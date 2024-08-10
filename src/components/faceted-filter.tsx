@@ -84,7 +84,7 @@ export function FacetedFilter({
   onValueChange,
   placeholder,
   emptyMessage = "No results found",
-  truncateLabel,
+  truncateLabel = false,
   children,
   className,
   ...props

@@ -49,7 +49,7 @@ interface DebouncedInputProps
   method?: "push" | "replace"
 
   /**
-   * Flag to disable scroll restoration when updating the URL.
+   * Indicates whether the page should scroll to the top when the URL changes.
    * @default false
    */
   scroll?: boolean
@@ -70,7 +70,7 @@ export function DebouncedInput({
   onValueChange,
   debounceMs = 500,
   placeholder,
-  scroll,
+  scroll = false,
   method = "replace",
   startTransition,
   className,

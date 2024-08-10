@@ -58,6 +58,12 @@ interface ComboboxInputProps
   emptyMessage?: string
 
   /**
+   * Indicates whether the options should be displayed immediately when the input is focused.
+   * @default false
+   */
+  immediate?: boolean
+
+  /**
    * Indicates whether the component is in a loading state.
    * @default false
    */
@@ -70,7 +76,8 @@ export function ComboboxInput({
   onValueChange,
   placeholder,
   emptyMessage = "No results found",
-  loading,
+  immediate = false,
+  loading = false,
   className,
   ...props
 }: ComboboxInputProps) {
@@ -84,24 +91,53 @@ export function ComboboxInput({
 
   const onKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      const input = inputRef.current
-      if (!input) return
+      if (!inputRef.current) return
 
-      // Keep the options displayed when the user is typing
+      const ignoredKeys = [
+        "Tab",
+        "ArrowUp",
+        "ArrowDown",
+        "Control",
+        "Alt",
+        "Shift",
+        "Escape",
+        "Delete",
+        "Home",
+        "End",
+        "PageUp",
+        "PageDown",
+        "Insert",
+        "F1",
+        "F2",
+        "F3",
+        "F4",
+        "F5",
+        "F6",
+        "F7",
+        "F8",
+        "F9",
+        "F10",
+        "F11",
+        "F12",
+      ]
+
+      if (ignoredKeys.includes(event.key)) return
+
       if (!open) {
         setOpen(true)
       }
 
       // This is not a default behaviour of the <input /> field
-      if (event.key === "Enter" && input.value !== "") {
+      if (event.key === "Enter" && inputRef.current.value !== "") {
         const selectedOption = options.find(
-          (option) => option.label === input.value
+          (option) => option.label === inputRef.current?.value
         )
         setCurrentOption(selectedOption)
       }
 
       if (event.key === "Escape") {
-        input.blur()
+        setInput("")
+        setOpen(false)
       }
     },
     [open, options, setCurrentOption]
@@ -136,7 +172,11 @@ export function ComboboxInput({
           }
         }}
         onBlur={onBlur}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          if (immediate) {
+            setOpen(true)
+          }
+        }}
         placeholder={placeholder}
         className={cn("border-b-0", className)}
         {...props}
