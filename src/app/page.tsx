@@ -1,6 +1,3 @@
-"use client"
-
-import * as React from "react"
 import { PlusCircledIcon } from "@radix-ui/react-icons"
 
 import { dataConfig } from "@/config/data"
@@ -23,8 +20,6 @@ import {
 import { Shell } from "@/components/shell"
 
 export default function IndexPage() {
-  const [value, setValue] = React.useState("")
-
   return (
     <Shell>
       <PageHeader>
@@ -36,8 +31,7 @@ export default function IndexPage() {
           <CardHeader>
             <CardTitle>Faceted filter</CardTitle>
             <CardDescription>
-              A filter that allows users to select multiple options from a list
-              of available options.
+              A filter that allows multiple options to be selected from a list.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -58,8 +52,8 @@ export default function IndexPage() {
           <CardHeader>
             <CardTitle>Combobox input</CardTitle>
             <CardDescription>
-              A combobox input that allows users to search and select from a
-              list of available options.
+              An autocomplete input that allows a single option to be selected
+              from a list.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -80,11 +74,7 @@ export default function IndexPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DebouncedInput
-              placeholder="Search..."
-              value={value}
-              onValueChange={setValue}
-            />
+            <DebouncedInput placeholder="Search..." className="h-10" />
           </CardContent>
         </Card>
       </div>

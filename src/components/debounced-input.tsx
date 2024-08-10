@@ -2,15 +2,13 @@
 
 import * as React from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
 
 import { cn } from "@/lib/utils"
-import { useControllableState } from "@/hooks/use-controllable-state"
 import { useDebounce } from "@/hooks/use-debounce"
 import { Input } from "@/components/ui/input"
-import { Icons } from "@/components/icons"
 
-interface DebouncedInputProps extends React.HTMLAttributes<HTMLDivElement> {
+interface DebouncedInputProps
+  extends React.ComponentPropsWithoutRef<typeof Input> {
   /**
    * The key of the query.
    * When provided, the input value will be synced with the query string.
@@ -41,6 +39,15 @@ interface DebouncedInputProps extends React.HTMLAttributes<HTMLDivElement> {
    * The placeholder text for the input.
    */
   placeholder?: string
+
+  /**
+   * A callback function that is invoked before the transition
+   * when the input value changes.
+   * This function can be used to retrieve the pending state of the input.
+   * @see https://react.dev/reference/react/useTransition
+   *
+   */
+  startTransition?: React.TransitionStartFunction
 }
 
 export function DebouncedInput({
@@ -49,20 +56,18 @@ export function DebouncedInput({
   onValueChange,
   debounceMs = 500,
   placeholder,
+  startTransition,
   className,
   ...props
 }: DebouncedInputProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [isPending, startTransition] = React.useTransition()
 
-  const [controlledValue, setControlledValue] = useControllableState({
-    defaultProp: queryKey ? (searchParams.get(queryKey) ?? "") : "",
-    prop: value,
-    onChange: onValueChange,
-  })
-  const debouncedValue = useDebounce(controlledValue, debounceMs)
+  const [controlledValue = "", setControlledValue] = React.useState(
+    value ?? searchParams.get(queryKey ?? "") ?? ""
+  )
+  const debouncedValue = useDebounce(controlledValue, debounceMs, onValueChange)
 
   React.useEffect(() => {
     if (!queryKey) return
@@ -76,7 +81,7 @@ export function DebouncedInput({
       newQueryString.delete(queryKey)
     }
 
-    startTransition(() => {
+    startTransition?.(() => {
       router.replace(`${pathname}?${newQueryString.toString()}`, {
         scroll: false,
       })
@@ -85,23 +90,12 @@ export function DebouncedInput({
   }, [controlledValue, debouncedValue, queryKey])
 
   return (
-    <div className={cn("relative h-11 w-full", className)} {...props}>
-      <div className="absolute left-3 top-3 flex size-[1.125rem] shrink-0 items-center justify-center text-foreground/50">
-        {isPending ? (
-          <Icons.spinner
-            className="size-full animate-spin"
-            aria-hidden="true"
-          />
-        ) : (
-          <MagnifyingGlassIcon className="size-full" aria-hidden="true" />
-        )}
-      </div>
-      <Input
-        placeholder={placeholder}
-        className="size-full pl-10"
-        value={value}
-        onChange={(e) => setControlledValue(e.target.value)}
-      />
-    </div>
+    <Input
+      placeholder={placeholder}
+      value={controlledValue}
+      onChange={(event) => setControlledValue(event.target.value)}
+      className={cn(className)}
+      {...props}
+    />
   )
 }
