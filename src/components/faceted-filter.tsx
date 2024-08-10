@@ -1,5 +1,8 @@
 "use client"
 
+/**
+ * @see https://github.com/shadcn-ui/ui/blob/main/apps/www/app/(app)/examples/tasks/components/data-table-faceted-filter.tsx
+ */
 import * as React from "react"
 import { type Option } from "@/types"
 import { CheckIcon } from "@radix-ui/react-icons"
@@ -29,54 +32,58 @@ interface FacetedFilterProps
   extends Omit<PopoverTriggerProps, "defaultValue" | "value">,
     Omit<ButtonProps, "defaultValue" | "value"> {
   /**
-   * The placeholder text for the filter input.
-   * @type {string}
-   * @default undefined
-   * @example placeholder="Search..."
-   */
-  placeholder?: string
-
-  /**
-   * The current value of the filter.
-   * @type {string[]}
-   * @default undefined
-   * @example value={["option1", "option2"]}
-   */
-  value?: string[]
-
-  /**
-   * Callback function to handle changes in the filter value.
-   * @param {React.SetStateAction<string[]>} value - The new value of the filter.
-   * @example onValueChange={(newValue) => console.log(newValue)}
-   */
-  onValueChange?: React.Dispatch<React.SetStateAction<string[]>>
-
-  /**
    * The array of options available for filtering.
    * Each option can have a label, value, and optional properties like description, icon, and others.
    *
    * @example
    * ```tsx
    * options={[
-   *  {label: "Status", value: "status", variant: "checkbox", options: [{label: "Active", value: "active"}, {label: "Inactive", value: "inactive"}]}
+   *  { label: "Option 1", value: "option-1" },
+   * { label: "Option 2", value: "option-2" },
    * ]}
    * ```
    */
   options: Option[]
 
   /**
+   * The value of the filter.
+   * @example value={["option-1", "option-2"]}
+   */
+  value?: string[]
+
+  /**
+   * Callback function to handle changes in the filter value.
+   * @param value - The new value of the filter.
+   * @example onValueChange={(value) => console.log(value)}
+   */
+  onValueChange?: React.Dispatch<React.SetStateAction<string[]>>
+
+  /**
+   * The placeholder text for the filter input.
+   * @type string | undefined
+   */
+  placeholder?: string
+
+  /**
+   * Message to display when no results are found.
+   * @default "No results found"
+   */
+  emptyMessage?: string
+
+  /**
    * Whether to truncate the label text when it is too long.
-   * @type {boolean}
+   * @type boolean | undefined
    * @default false
    */
   truncateLabel?: boolean
 }
 
 export function FacetedFilter({
-  placeholder,
+  options,
   value,
   onValueChange,
-  options,
+  placeholder,
+  emptyMessage = "No results found",
   truncateLabel,
   children,
   className,
@@ -139,8 +146,8 @@ export function FacetedFilter({
         <Command>
           <CommandInput placeholder={placeholder} />
           <CommandList className="max-h-full">
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-y-auto overflow-x-hidden">
+            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            <CommandGroup className="max-h-[18.75rem] overflow-y-auto overflow-x-hidden">
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value)
 
