@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { PlusCircledIcon } from "@radix-ui/react-icons"
 
 import { dataConfig } from "@/config/data"
@@ -9,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ComboboxInput } from "@/components/command-input"
 import { DebouncedInput } from "@/components/debounced-input"
 import { FacetedFilter } from "@/components/faceted-filter"
@@ -74,7 +76,9 @@ export default function IndexPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DebouncedInput placeholder="Search..." className="h-10" />
+            <Suspense fallback={<Skeleton className="h-10" />}>
+              <DebouncedInput placeholder="Search..." className="h-10" />
+            </Suspense>
           </CardContent>
         </Card>
       </div>
