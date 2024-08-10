@@ -77,7 +77,11 @@ export default function IndexPage() {
           </CardHeader>
           <CardContent>
             <Suspense fallback={<Skeleton className="h-10" />}>
-              <DebouncedInput placeholder="Search..." className="h-10" />
+              <DebouncedInput
+                placeholder="Search..."
+                queryKey="search"
+                className="h-10"
+              />
             </Suspense>
           </CardContent>
         </Card>

@@ -30,15 +30,29 @@ interface DebouncedInputProps
   onValueChange?: (value: string) => void
 
   /**
+   * The placeholder text for the input.
+   */
+  placeholder?: string
+
+  /**
    * The debounce time in milliseconds.
    * @default 500
    */
   debounceMs?: number
 
   /**
-   * The placeholder text for the input.
+   * The method to use when updating the URL.
+   * - "push" - Pushes a new entry onto the history stack.
+   * - "replace" - Replaces the current entry on the history stack.
+   * @default "replace"
    */
-  placeholder?: string
+  method?: "push" | "replace"
+
+  /**
+   * Flag to disable scroll restoration when updating the URL.
+   * @default false
+   */
+  scroll?: boolean
 
   /**
    * A callback function that is invoked before the transition
@@ -56,6 +70,8 @@ export function DebouncedInput({
   onValueChange,
   debounceMs = 500,
   placeholder,
+  scroll,
+  method = "replace",
   startTransition,
   className,
   ...props
@@ -81,11 +97,20 @@ export function DebouncedInput({
       newQueryString.delete(queryKey)
     }
 
-    startTransition?.(() => {
-      router.replace(`${pathname}?${newQueryString.toString()}`, {
-        scroll: false,
-      })
-    })
+    function onUrlChange() {
+      const url = `${pathname}?${newQueryString.toString()}`
+
+      method === "push"
+        ? router.push(url, { scroll })
+        : router.replace(url, { scroll })
+    }
+
+    startTransition
+      ? startTransition(() => {
+          onUrlChange()
+        })
+      : onUrlChange()
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlledValue, debouncedValue, queryKey])
 
