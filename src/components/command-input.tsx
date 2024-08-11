@@ -124,12 +124,11 @@ export function ComboboxInput({
 
   const onKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (!inputRef.current) return
+      const inputElement = inputRef.current
+      if (!inputElement) return
 
       const ignoredKeys = [
         "Tab",
-        "ArrowUp",
-        "ArrowDown",
         "Control",
         "Alt",
         "Shift",
@@ -139,18 +138,8 @@ export function ComboboxInput({
         "PageUp",
         "PageDown",
         "Insert",
-        "F1",
-        "F2",
-        "F3",
-        "F4",
-        "F5",
-        "F6",
-        "F7",
-        "F8",
-        "F9",
-        "F10",
-        "F11",
-        "F12",
+        "ArrowLeft",
+        "ArrowRight",
       ]
 
       if (ignoredKeys.includes(event.key)) return
@@ -160,30 +149,39 @@ export function ComboboxInput({
       }
 
       /**
-       * Dismisses the popup if it is visible. If the popup is hidden before Escape is pressed, clears the combobox
+       * When Escape is pressed:
+       * - If the input value matches the current option's label, it simply closes the options list.
+       * - If no option is selected or the input value does not match the current option, it clears the input value, closes the options list, and sets the current option to undefined.
+       * - Focus is then returned to the input element.
        * @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/#:~:text=in%20the%20popup.-,Escape,is%20pressed%2C%20clears%20the%20combobox.,-Enter
        */
       if (event.key === "Escape") {
+        if (currentOption && inputElement.value === currentOption.label) {
+          setOpen(false)
+          return
+        }
+
         setInput("")
         setOpen(false)
         setCurrentOption(undefined)
         inputRef.current.focus()
       }
 
-      // This is not a default behaviour of the <input /> field
-      if (event.key === "Enter" && inputRef.current.value !== "") {
+      /**
+       * When Enter is pressed and the input field is not empty:
+       * - It searches for an option whose label matches the current input value.
+       * - If a matching option is found, it sets this option as the current option.
+       * - The cursor is then moved to the end of the input field.
+       * @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/#:~:text=Enter,add%20another%20recipient.
+       */
+      if (event.key === "Enter" && inputElement.value !== "") {
         const selectedOption = options.find(
-          (option) => option.label === inputRef.current?.value
+          (option) => option.label === inputElement.value
         )
         setCurrentOption(selectedOption)
       }
-
-      if (event.key === "Escape") {
-        setInput("")
-        setOpen(false)
-      }
     },
-    [open, options, setCurrentOption]
+    [currentOption, open, options, setCurrentOption]
   )
 
   const onBlur = React.useCallback(() => {
