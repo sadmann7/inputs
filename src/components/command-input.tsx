@@ -159,10 +159,14 @@ export function ComboboxInput({
         setOpen(true)
       }
 
-      // If escape key is pressed, clear the input and close the options list, and focus the input
+      /**
+       * Dismisses the popup if it is visible. If the popup is hidden before Escape is pressed, clears the combobox
+       * @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/#:~:text=in%20the%20popup.-,Escape,is%20pressed%2C%20clears%20the%20combobox.,-Enter
+       */
       if (event.key === "Escape") {
         setInput("")
         setOpen(false)
+        setCurrentOption(undefined)
         inputRef.current.focus()
       }
 
