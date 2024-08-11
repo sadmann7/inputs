@@ -6,6 +6,7 @@
 import * as React from "react"
 import { type Option } from "@/types"
 import { CheckIcon } from "@radix-ui/react-icons"
+import { usePopper, type PopperProps } from "react-popper"
 
 import { cn } from "@/lib/utils"
 import { useControllableState } from "@/hooks/use-controllable-state"
@@ -64,6 +65,24 @@ interface ComboboxInputProps
   immediate?: boolean
 
   /**
+   * The placement of the options list relative to the input.
+   * @default "bottom-start"
+   */
+  placement?: PopperProps<HTMLElement>["placement"]
+
+  /**
+   * Horizontal distance in pixels between the options list and the input.
+   * @default 0
+   */
+  alignOffset?: number
+
+  /**
+   * Vertical distance in pixels between the options list and the input.
+   * @default 4
+   */
+  sideOffset?: number
+
+  /**
    * Indicates whether the component is in a loading state.
    * @default false
    */
@@ -76,6 +95,9 @@ export function ComboboxInput({
   onValueChange,
   placeholder,
   emptyMessage = "No results found",
+  placement = "bottom-start",
+  alignOffset = 0,
+  sideOffset = 4,
   immediate = false,
   loading = false,
   className,
@@ -89,6 +111,17 @@ export function ComboboxInput({
     onChange: onValueChange,
   })
 
+  const [referenceElement, setReferenceElement] =
+    React.useState<HTMLDivElement | null>(null)
+  const [popperElement, setPopperElement] =
+    React.useState<HTMLDivElement | null>(null)
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    modifiers: [
+      { name: "offset", options: { offset: [alignOffset, sideOffset] } },
+    ],
+    placement,
+  })
+
   const onKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (!inputRef.current) return
@@ -100,7 +133,6 @@ export function ComboboxInput({
         "Control",
         "Alt",
         "Shift",
-        "Escape",
         "Delete",
         "Home",
         "End",
@@ -125,6 +157,13 @@ export function ComboboxInput({
 
       if (!open) {
         setOpen(true)
+      }
+
+      // If escape key is pressed, clear the input and close the options list, and focus the input
+      if (event.key === "Escape") {
+        setInput("")
+        setOpen(false)
+        inputRef.current.focus()
       }
 
       // This is not a default behaviour of the <input /> field
@@ -159,7 +198,8 @@ export function ComboboxInput({
 
   return (
     <Command
-      className="overflow-visible [&_[cmdk-input-wrapper]]:rounded-md [&_[cmdk-input-wrapper]]:border"
+      ref={setReferenceElement}
+      className="relative overflow-visible [&_[cmdk-input-wrapper]]:rounded-md [&_[cmdk-input-wrapper]]:border"
       onKeyDown={onKeyDown}
     >
       <CommandInput
@@ -181,53 +221,53 @@ export function ComboboxInput({
         className={cn("border-b-0", className)}
         {...props}
       />
-      <div className="relative mt-1">
-        <div
-          className={cn(
-            "absolute top-0 z-50 w-full rounded-xl bg-popover text-popover-foreground outline-none animate-in fade-in-0 zoom-in-95",
-            open ? "block" : "hidden"
-          )}
-        >
-          <CommandList className="rounded-lg ring-1 ring-border">
-            {loading ? (
-              <CommandLoading>
-                <div className="p-1">
-                  <Skeleton className="h-8 w-full" />
-                </div>
-              </CommandLoading>
-            ) : null}
-            {options.length > 0 && !loading ? (
-              <CommandGroup>
-                {options.map((option) => {
-                  const isSelected = currentOption?.value === option.value
+      <CommandList
+        data-state={open ? "open" : "closed"}
+        ref={setPopperElement}
+        style={styles.popper}
+        className={cn(
+          "z-50 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:visible data-[state=closed]:invisible data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+          "data-[popper-placement=bottom-end]:translate-x-1/2 data-[popper-placement=bottom-start]:-translate-x-1/2 data-[popper-placement=left-end]:translate-y-1/2 data-[popper-placement=left-start]:-translate-y-1/2 data-[popper-placement=right-end]:translate-y-1/2 data-[popper-placement=right-start]:-translate-y-1/2 data-[popper-placement=top-end]:translate-x-1/2 data-[popper-placement=top-start]:-translate-x-1/2 data-[popper-placement=bottom-end]:slide-in-from-top-2 data-[popper-placement=bottom-start]:slide-in-from-top-2 data-[popper-placement=bottom]:slide-in-from-top-2 data-[popper-placement=left-end]:slide-in-from-right-2 data-[popper-placement=left-start]:slide-in-from-right-2 data-[popper-placement=left]:slide-in-from-right-2 data-[popper-placement=right-end]:slide-in-from-left-2 data-[popper-placement=right-start]:slide-in-from-left-2 data-[popper-placement=right]:slide-in-from-left-2 data-[popper-placement=top-end]:slide-in-from-bottom-2 data-[popper-placement=top-start]:slide-in-from-bottom-2 data-[popper-placement=top]:slide-in-from-bottom-2"
+        )}
+        {...attributes.popper}
+      >
+        {loading ? (
+          <CommandLoading>
+            <div className="p-1">
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </CommandLoading>
+        ) : null}
+        {options.length > 0 && !loading ? (
+          <CommandGroup>
+            {options.map((option) => {
+              const isSelected = currentOption?.value === option.value
 
-                  return (
-                    <CommandItem
-                      key={option.value}
-                      value={option.label}
-                      onMouseDown={(event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                      }}
-                      onSelect={() => onSelect(option)}
-                      className={cn(
-                        "flex w-full items-center gap-2",
-                        !isSelected ? "pl-8" : null
-                      )}
-                    >
-                      {isSelected ? (
-                        <CheckIcon className="w-4" aria-hidden="true" />
-                      ) : null}
-                      {option.label}
-                    </CommandItem>
-                  )
-                })}
-              </CommandGroup>
-            ) : null}
-            {!loading ? <CommandEmpty>{emptyMessage}</CommandEmpty> : null}
-          </CommandList>
-        </div>
-      </div>
+              return (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onMouseDown={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                  }}
+                  onSelect={() => onSelect(option)}
+                  className={cn(
+                    "flex w-full items-center gap-2",
+                    !isSelected ? "pl-8" : null
+                  )}
+                >
+                  {isSelected ? (
+                    <CheckIcon className="w-4" aria-hidden="true" />
+                  ) : null}
+                  {option.label}
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
+        ) : null}
+        {!loading ? <CommandEmpty>{emptyMessage}</CommandEmpty> : null}
+      </CommandList>
     </Command>
   )
 }
