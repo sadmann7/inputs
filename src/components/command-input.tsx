@@ -144,22 +144,6 @@ export function ComboboxInput({
 
       if (nonPrintableKeys.includes(event.key)) return
 
-      if (open && event.key === "PageUp") {
-        const firstOption = document.querySelector(
-          "[data-index='0']"
-        ) as HTMLElement
-
-        // set data-selected to true
-        firstOption?.setAttribute("data-selected", "true")
-        // remove data-selected from all other options
-        const options = document.querySelectorAll("[data-index]")
-        options.forEach((option) => {
-          if (option !== firstOption) {
-            option.removeAttribute("data-selected")
-          }
-        })
-      }
-
       /**
        * When the input field is empty and the options list is closed and the Backspace key is pressed, close the options list.
        * @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/#:~:text=the%20characters%20typed.-,Backspace,to%20the%20combobox%20and%20deletes%20the%20character%20prior%20to%20the%20cursor.,-Delete
@@ -168,8 +152,6 @@ export function ComboboxInput({
         if (open) setOpen(false)
         return
       }
-
-      // If options list is open, and page up is pressed, focus the first option.
 
       /**
        * When Escape is pressed:
@@ -255,8 +237,8 @@ export function ComboboxInput({
         {...props}
       />
       <CommandList
-        data-state={open ? "open" : "closed"}
         ref={setPopperElement}
+        data-state={open ? "open" : "closed"}
         style={styles.popper}
         className={cn(
           "z-50 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:visible data-[state=closed]:invisible data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
