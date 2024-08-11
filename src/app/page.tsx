@@ -42,7 +42,7 @@ export default function IndexPage() {
           <CardHeader>
             <CardTitle>Faceted filter</CardTitle>
             <CardDescription>
-              A filter that allows multiple options to be selected from a list.
+              Select multiple options from a list of items.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -63,8 +63,7 @@ export default function IndexPage() {
           <CardHeader>
             <CardTitle>Combobox input</CardTitle>
             <CardDescription>
-              An autocomplete input that allows a single option to be selected
-              from a list.
+              Select an option from a list of items.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -79,10 +78,9 @@ export default function IndexPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Places combobx</CardTitle>
+            <CardTitle>Places combobox</CardTitle>
             <CardDescription>
-              A combobox input that uses the Google Places API to search for
-              places.
+              Select a place from a list using the google maps api.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -95,7 +93,7 @@ export default function IndexPage() {
           <CardHeader>
             <CardTitle>Debounced input</CardTitle>
             <CardDescription>
-              An input that debounces the value before triggering a callback.
+              Input that debounces the value before emitting it.
             </CardDescription>
           </CardHeader>
           <CardContent>
