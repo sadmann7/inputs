@@ -7,7 +7,7 @@ import { getPlacesSchema } from "@/lib/validations"
 
 export async function getPlaces(query: string) {
   try {
-    const apiKey = env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    const apiKey = env.GOOGLE_MAPS_API_KEY
 
     if (!apiKey) {
       await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -19,7 +19,7 @@ export async function getPlaces(query: string) {
     }
 
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=${env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+      `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=${apiKey}`
     )
     const safeParsed = getPlacesSchema.safeParse(await response.json())
 
