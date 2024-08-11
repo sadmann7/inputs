@@ -1,8 +1,11 @@
 import { Suspense } from "react"
 import { PlusCircledIcon } from "@radix-ui/react-icons"
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 
 import { dataConfig } from "@/config/data"
 import { siteConfig } from "@/config/site"
+import { getQueryClient } from "@/lib/get-query-client"
+import { placesQueryOpts } from "@/lib/query-options"
 import {
   Card,
   CardContent,
@@ -21,7 +24,13 @@ import {
 } from "@/components/page-header"
 import { Shell } from "@/components/shell"
 
+import { PlacesCombobox } from "./_components/places-combobx"
+
 export default function IndexPage() {
+  const queryClient = getQueryClient()
+
+  void queryClient.prefetchQuery(placesQueryOpts)
+
   return (
     <Shell>
       <PageHeader>
@@ -66,6 +75,20 @@ export default function IndexPage() {
                 value: trick.id,
               }))}
             />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Places combobx</CardTitle>
+            <CardDescription>
+              A combobox input that uses the Google Places API to search for
+              places.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <HydrationBoundary state={dehydrate(queryClient)}>
+              <PlacesCombobox />
+            </HydrationBoundary>
           </CardContent>
         </Card>
         <Card>

@@ -39,7 +39,7 @@ const nonPrintableKeys = [
 interface ComboboxInputProps
   extends Omit<
     React.ComponentPropsWithoutRef<typeof CommandInput>,
-    "value" | "onValueChange"
+    "defaultValue" | "value" | "onValueChange"
   > {
   /**
    * The list of options available for selection.
@@ -55,17 +55,36 @@ interface ComboboxInputProps
   options: Option[]
 
   /**
-   * The currently selected option.
+   * The value of the input field.
+   * @example "Option 1"
+   */
+  input?: string
+
+  /**
+   * Callback function that is called when the input value changes.
+   * @param value - The new input value.
+   * @example onValueChange={(value) => console.log(value)}
+   */
+  onInputChange?: (value: string) => void
+
+  /**
+   * The default selected option.
+   * @example { label: "Option 1", value: "option-1" }
+   */
+  defaultValue?: Option
+
+  /**
+   * The selected option.
    * @example { label: "Option 1", value: "option-1" }
    */
   value?: Option
 
   /**
-   * Callback function that is called when the selected value changes.
+   * Callback function that is called when the selected option changes.
    * @param value - The new selected option.
-   * @example onValueChange={(value) => console.log(value)}
+   * @example onValueChange={(option) => console.log(option)}
    */
-  onValueChange?: (value: Option) => void
+  onValueChange?: (option: Option) => void
 
   /**
    * Message to display when no results are found.
@@ -106,6 +125,9 @@ interface ComboboxInputProps
 
 export function ComboboxInput({
   options,
+  input,
+  onInputChange,
+  defaultValue,
   value,
   onValueChange,
   placeholder,
@@ -120,8 +142,13 @@ export function ComboboxInput({
 }: ComboboxInputProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [open, setOpen] = React.useState(false)
-  const [input, setInput] = React.useState("")
+  const [controlledInput, setControlledInput] = useControllableState({
+    prop: input,
+    onChange: onInputChange,
+  })
+
   const [currentOption, setCurrentOption] = useControllableState({
+    defaultProp: defaultValue,
     prop: value,
     onChange: onValueChange,
   })
@@ -171,7 +198,7 @@ export function ComboboxInput({
           return
         }
 
-        setInput("")
+        setControlledInput("")
         setOpen(false)
         setCurrentOption(undefined)
         inputRef.current.focus()
@@ -193,21 +220,21 @@ export function ComboboxInput({
 
       if (!open) setOpen(true)
     },
-    [currentOption, open, options, setCurrentOption]
+    [currentOption, open, options, setControlledInput, setCurrentOption]
   )
 
   const onBlur = React.useCallback(() => {
     setOpen(false)
-    setInput(currentOption?.label ?? "")
-  }, [currentOption])
+    setControlledInput(currentOption?.label ?? "")
+  }, [currentOption?.label, setControlledInput])
 
   const onSelect = React.useCallback(
     (selectedOption: Option) => {
-      setInput(selectedOption.label)
+      setControlledInput(selectedOption.label)
       setCurrentOption(selectedOption)
       setOpen(false)
     },
-    [setCurrentOption]
+    [setControlledInput, setCurrentOption]
   )
 
   return (
@@ -219,9 +246,11 @@ export function ComboboxInput({
     >
       <CommandInput
         ref={inputRef}
-        value={input}
+        value={controlledInput}
         onValueChange={(value) => {
-          setInput(value)
+          if (loading) return
+
+          setControlledInput(value)
           if (value === "") {
             setCurrentOption(undefined)
           }
