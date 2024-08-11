@@ -276,10 +276,8 @@ export function ComboboxInput({
         {...attributes.popper}
       >
         {loading ? (
-          <CommandLoading>
-            <div className="p-1">
-              <Skeleton className="h-8 w-full" />
-            </div>
+          <CommandLoading className="p-1">
+            <Skeleton className="h-8 w-full" />
           </CommandLoading>
         ) : null}
         {options.length > 0 && !loading ? (
@@ -296,10 +294,9 @@ export function ComboboxInput({
                     event.stopPropagation()
                   }}
                   onSelect={() => onSelect(option)}
-                  className={cn(
-                    "flex w-full items-center gap-2",
-                    !isSelected ? "pl-8" : null
-                  )}
+                  className={cn("flex w-full items-center gap-2", {
+                    "pl-8": !isSelected,
+                  })}
                 >
                   {isSelected ? (
                     <CheckIcon className="w-4" aria-hidden="true" />
@@ -310,7 +307,7 @@ export function ComboboxInput({
             })}
           </CommandGroup>
         ) : null}
-        {!loading ? <CommandEmpty>{emptyMessage}</CommandEmpty> : null}
+        {loading ? null : <CommandEmpty>{emptyMessage}</CommandEmpty>}
       </CommandList>
     </Command>
   )
