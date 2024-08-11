@@ -21,6 +21,21 @@ import {
 } from "@/components/ui/command"
 import { Skeleton } from "@/components/ui/skeleton"
 
+const nonPrintableKeys = [
+  "Tab",
+  "Control",
+  "Alt",
+  "Shift",
+  "Delete",
+  "Home",
+  "End",
+  "PageUp",
+  "PageDown",
+  "Insert",
+  "ArrowLeft",
+  "ArrowRight",
+]
+
 interface ComboboxInputProps
   extends Omit<
     React.ComponentPropsWithoutRef<typeof CommandInput>,
@@ -127,37 +142,50 @@ export function ComboboxInput({
       const inputElement = inputRef.current
       if (!inputElement) return
 
-      const ignoredKeys = [
-        "Tab",
-        "Control",
-        "Alt",
-        "Shift",
-        "Delete",
-        "Home",
-        "End",
-        "PageUp",
-        "PageDown",
-        "Insert",
-        "ArrowLeft",
-        "ArrowRight",
-      ]
+      if (nonPrintableKeys.includes(event.key)) return
 
-      if (ignoredKeys.includes(event.key)) return
+      if (open && event.key === "PageUp") {
+        const firstOption = document.querySelector(
+          "[data-index='0']"
+        ) as HTMLElement
 
-      if (!open) {
-        setOpen(true)
+        // set data-selected to true
+        firstOption?.setAttribute("data-selected", "true")
+        // remove data-selected from all other options
+        const options = document.querySelectorAll("[data-index]")
+        options.forEach((option) => {
+          if (option !== firstOption) {
+            option.removeAttribute("data-selected")
+          }
+        })
       }
 
       /**
+       * When the input field is empty and the options list is closed and the Backspace key is pressed, close the options list.
+       * @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/#:~:text=the%20characters%20typed.-,Backspace,to%20the%20combobox%20and%20deletes%20the%20character%20prior%20to%20the%20cursor.,-Delete
+       */
+      if (event.key === "Backspace" && inputElement.value === "" && !open) {
+        if (open) setOpen(false)
+        return
+      }
+
+      // If options list is open, and page up is pressed, focus the first option.
+
+      /**
        * When Escape is pressed:
-       * - If the input value matches the current option's label, it simply closes the options list.
-       * - If no option is selected or the input value does not match the current option, it clears the input value, closes the options list, and sets the current option to undefined.
+       * - If the input value matches the current option's label, simply close the options list.
+       * - If no option is selected or the input value does not match the current option, clear the input value, closes the options list, and sets the current option to undefined.
        * - Focus is then returned to the input element.
        * @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/#:~:text=in%20the%20popup.-,Escape,is%20pressed%2C%20clears%20the%20combobox.,-Enter
        */
       if (event.key === "Escape") {
         if (currentOption && inputElement.value === currentOption.label) {
-          setOpen(false)
+          if (open) setOpen(false)
+          return
+        }
+
+        if (inputElement.value === "") {
+          if (open) setOpen(false)
           return
         }
 
@@ -169,8 +197,8 @@ export function ComboboxInput({
 
       /**
        * When Enter is pressed and the input field is not empty:
-       * - It searches for an option whose label matches the current input value.
-       * - If a matching option is found, it sets this option as the current option.
+       * - Search for an option whose label matches the current input value.
+       * - If a matching option is found, set this option as the current option.
        * - The cursor is then moved to the end of the input field.
        * @see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/#:~:text=Enter,add%20another%20recipient.
        */
@@ -180,6 +208,8 @@ export function ComboboxInput({
         )
         setCurrentOption(selectedOption)
       }
+
+      if (!open) setOpen(true)
     },
     [currentOption, open, options, setCurrentOption]
   )
@@ -203,6 +233,7 @@ export function ComboboxInput({
       ref={setReferenceElement}
       className="relative overflow-visible [&_[cmdk-input-wrapper]]:rounded-md [&_[cmdk-input-wrapper]]:border"
       onKeyDown={onKeyDown}
+      {...attributes.reference}
     >
       <CommandInput
         ref={inputRef}
