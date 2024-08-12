@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { getPlaces } from "@/lib/actions"
 import { useDebounce } from "@/hooks/use-debounce"
-import { ComboboxInput } from "@/components/command-input"
+import { ComboboxInput } from "@/components/combobox-input"
 
 export function PlacesCombobox() {
   const [query, setQuery] = React.useState("")
@@ -17,7 +17,7 @@ export function PlacesCombobox() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["places", debouncedQuery],
-    queryFn: () => getPlaces(debouncedQuery),
+    queryFn: async () => await getPlaces({ query: debouncedQuery }),
     enabled: debouncedQuery.length > 0,
   })
 

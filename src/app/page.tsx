@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ComboboxInput } from "@/components/command-input"
+import { ComboboxInput } from "@/components/combobox-input"
 import { DebouncedInput } from "@/components/debounced-input"
 import { FacetedFilter } from "@/components/faceted-filter"
 import {

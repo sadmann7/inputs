@@ -1,33 +1,27 @@
 "use server"
 
 import { env } from "@/env"
-import { faker } from "@faker-js/faker"
 
 import { getPlacesSchema } from "@/lib/validations"
 
-export async function getPlaces(query: string) {
+export async function getPlaces({ query }: { query: string }) {
   try {
     const apiKey = env.GOOGLE_MAPS_API_KEY
 
     if (!apiKey) {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      return Array.from({ length: 10 }, () => ({
-        description: faker.location.city(),
-        place_id: faker.string.uuid(),
-      }))
+      throw new Error("Missing Google Maps API key")
     }
 
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=${apiKey}`
     )
-    const safeParsed = getPlacesSchema.safeParse(await response.json())
+    const safeParsedOutput = getPlacesSchema.safeParse(await response.json())
 
-    if (!safeParsed.success) {
+    if (!safeParsedOutput.success) {
       throw new Error("Failed to fetch places")
     }
 
-    return safeParsed.data.predictions
+    return safeParsedOutput.data.predictions
   } catch (err) {
     return []
   }
