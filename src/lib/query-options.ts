@@ -4,6 +4,6 @@ import { getPlaces } from "@/lib/actions"
 
 export const placesQueryOpts = queryOptions({
   queryKey: ["places", ""],
-  queryFn: () => getPlaces(""),
+  queryFn: () => getPlaces({ query: "" }),
   enabled: false,
 })
