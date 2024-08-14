@@ -62,8 +62,6 @@ export function InternationalPhoneInput({
 
   const error = validate && internationalPhoneSchema.safeParse(inputValue).error
 
-  console.log(error)
-
   return (
     <div className="space-y-1.5">
       <div className="flex w-full items-center space-x-2">
