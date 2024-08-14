@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ComboboxInput } from "@/components/combobox-input"
 import { DebouncedInput } from "@/components/debounced-input"
 import { FacetedFilter } from "@/components/faceted-filter"
+import { InternationalPhoneInput } from "@/components/international-phone-input"
 import {
   PageHeader,
   PageHeaderDescription,
@@ -103,6 +104,20 @@ export default function IndexPage() {
                 queryKey="search"
                 className="h-10"
               />
+            </Suspense>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>International Phone Input</CardTitle>
+            <CardDescription>
+              Validated phone input with country code selection
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Suspense fallback={<Skeleton className="h-10" />}>
+              <InternationalPhoneInput validate />
             </Suspense>
           </CardContent>
         </Card>
