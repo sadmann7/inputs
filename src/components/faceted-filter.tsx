@@ -77,18 +77,17 @@ interface FacetedFilterProps
   emptyMessage?: string
 
   /**
-   * Whether to truncate the label text when it is too long.
-   * @type boolean | undefined
+   * When set to true, the label of the selected options will be truncated.
    * @default false
    */
   truncateLabel?: boolean
 
   /**
-   * Whether to show the filter options in equal width.
-   * @type boolean | undefined
+   * When set to true, the popover content will match the width of the trigger button.
+   * If not set, the popover content will have a default fixed width of 12.5rem.
    * @default false
    */
-  equalWidth?: boolean
+  uniform?: boolean
 
   /**
    * Event handler called when auto-focusing on close.
@@ -106,13 +105,13 @@ export function FacetedFilter({
   placeholder,
   emptyMessage = "No results found",
   truncateLabel = false,
-  equalWidth = false,
+  uniform = false,
   onCloseAutoFocus,
   children,
   className,
   ...props
 }: FacetedFilterProps) {
-  const triggerRef = React.useRef<HTMLButtonElement | null>(null)
+  const triggerRef = React.useRef<React.ElementRef<typeof PopoverTrigger>>(null)
   const [filterValues, setFilterValues] = useControllableState({
     defaultProp: defaultValue,
     prop: value,
@@ -173,7 +172,7 @@ export function FacetedFilter({
       <PopoverContent
         className={cn(
           "p-0",
-          equalWidth ? "w-[var(--radix-popover-trigger-width)]" : "w-[12.5rem]"
+          uniform ? "w-[var(--radix-popover-trigger-width)]" : "w-[12.5rem]"
         )}
         align="start"
         onCloseAutoFocus={composeEventHandlers(onCloseAutoFocus, (event) => {
