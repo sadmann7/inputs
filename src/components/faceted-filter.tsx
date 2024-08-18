@@ -8,7 +8,7 @@ import { type Option } from "@/types"
 import { CheckIcon } from "@radix-ui/react-icons"
 import { type PopoverTriggerProps } from "@radix-ui/react-popover"
 
-import { cn } from "@/lib/utils"
+import { cn, composeEventHandlers } from "@/lib/utils"
 import { useControllableState } from "@/hooks/use-controllable-state"
 import { Badge } from "@/components/ui/badge"
 import { Button, type ButtonProps } from "@/components/ui/button"
@@ -46,6 +46,12 @@ interface FacetedFilterProps
   options: Option[]
 
   /**
+   * The default value of the filter.
+   * @example defaultValue={["option-1"]}
+   */
+  defaultValue?: string[]
+
+  /**
    * The value of the filter.
    * @example value={["option-1", "option-2"]}
    */
@@ -76,20 +82,39 @@ interface FacetedFilterProps
    * @default false
    */
   truncateLabel?: boolean
+
+  /**
+   * Whether to show the filter options in equal width.
+   * @type boolean | undefined
+   * @default false
+   */
+  equalWidth?: boolean
+
+  /**
+   * Event handler called when auto-focusing on close.
+   * Can be prevented.
+   * @example onCloseAutoFocus={(event) => event.preventDefault()}
+   */
+  onCloseAutoFocus?: (event: Event) => void
 }
 
 export function FacetedFilter({
   options,
+  defaultValue,
   value,
   onValueChange,
   placeholder,
   emptyMessage = "No results found",
   truncateLabel = false,
+  equalWidth = false,
+  onCloseAutoFocus,
   children,
   className,
   ...props
 }: FacetedFilterProps) {
+  const triggerRef = React.useRef<HTMLButtonElement | null>(null)
   const [filterValues, setFilterValues] = useControllableState({
+    defaultProp: defaultValue,
     prop: value,
     onChange: onValueChange,
   })
@@ -98,17 +123,20 @@ export function FacetedFilter({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger ref={triggerRef} asChild>
         <Button
           aria-label="Filter data"
           variant="outline"
           size="sm"
-          className={cn("h-8 border-dashed", className)}
+          className={cn(
+            "focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0",
+            className
+          )}
           {...props}
         >
           {children}
           {selectedValues?.size > 0 && (
-            <>
+            <div className="flex items-center">
               <Separator orientation="vertical" className="mx-2 h-4" />
               <Badge
                 variant="secondary"
@@ -116,7 +144,7 @@ export function FacetedFilter({
               >
                 {selectedValues.size}
               </Badge>
-              <div className="hidden space-x-1 lg:flex">
+              <div className="hidden min-w-0 gap-1 lg:flex">
                 {selectedValues.size > 2 ? (
                   <Badge
                     variant="secondary"
@@ -131,18 +159,29 @@ export function FacetedFilter({
                       <Badge
                         variant="secondary"
                         key={option.value}
-                        className="rounded-sm px-1 font-normal"
+                        className="truncate rounded-sm px-1 font-normal"
                       >
                         {option.label}
                       </Badge>
                     ))
                 )}
               </div>
-            </>
+            </div>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[12.5rem] p-0" align="start">
+      <PopoverContent
+        className={cn(
+          "p-0",
+          equalWidth ? "w-[var(--radix-popover-trigger-width)]" : "w-[12.5rem]"
+        )}
+        align="start"
+        onCloseAutoFocus={composeEventHandlers(onCloseAutoFocus, (event) => {
+          triggerRef.current?.focus({ preventScroll: true })
+          event.preventDefault()
+        })}
+        collisionPadding={10}
+      >
         <Command>
           <CommandInput placeholder={placeholder} />
           <CommandList className="max-h-full">

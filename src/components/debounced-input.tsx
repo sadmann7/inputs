@@ -55,11 +55,9 @@ interface DebouncedInputProps
   scroll?: boolean
 
   /**
-   * A callback function that is invoked before the transition
-   * when the input value changes.
-   * This function can be used to retrieve the pending state of the input.
+   * A callback function that is called before updating the URL.
+   * Can be use to retrieve the pending state of the route transition.
    * @see https://react.dev/reference/react/useTransition
-   *
    */
   startTransition?: React.TransitionStartFunction
 }
@@ -112,7 +110,7 @@ export function DebouncedInput({
       : onUrlChange()
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controlledValue, debouncedValue, queryKey])
+  }, [controlledValue, debouncedValue, queryKey, method, scroll])
 
   return (
     <Input
